@@ -3,7 +3,7 @@ from pathlib import Path
 
 API_URL = "https://eajeyq4r3zljoq4rpovy2nthda0vtjqf.lambda-url.ap-south-1.on.aws"
 
-STUDENT_ID = "YOUR_STUDENT_ID_HERE"
+STUDENT_ID = "23MH1A1252"
 GITHUB_REPO_URL = "https://github.com/aravindpunyamantula/pki-2fa-python"
 
 def load_public_key_text(path: str) -> str:
