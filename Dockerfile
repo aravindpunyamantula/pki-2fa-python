@@ -3,12 +3,14 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install --prefix=/install -r requirements.txt && \
+    pip install -r requirements.txt && \
     rm -rf /root/.cache/pip
 
 FROM python:3.11-slim
 
 ENV TZ=UTC
+ENV PYTHONPATH=/app:/usr/local/lib/python3.11/site-packages
+
 WORKDIR /app
 
 RUN apt-get update && \
@@ -16,9 +18,7 @@ RUN apt-get update && \
     ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" > /etc/timezone && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /install /install
-
-ENV PYTHONPATH="/app:/usr/local:/install/lib/python3.11/site-packages"
+COPY --from=builder /usr/local /usr/local
 
 COPY app ./app
 COPY scripts ./scripts
@@ -34,7 +34,7 @@ RUN cp cron/2fa-cron /etc/cron.d/2fa-cron && \
     chmod 0644 /etc/cron.d/2fa-cron && \
     crontab /etc/cron.d/2fa-cron
 
-RUN mkdir -p /data /cron && chmod -R 755 /data /cron
+RUN mkdir -p /data /cron && chmod 755 /data /cron
 
 VOLUME ["/data", "/cron"]
 
