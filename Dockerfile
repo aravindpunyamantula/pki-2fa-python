@@ -16,8 +16,9 @@ RUN apt-get update && \
     ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" > /etc/timezone && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /install /usr/local
-ENV PYTHONPATH=/usr/local
+COPY --from=builder /install /install
+
+ENV PYTHONPATH="/app:/usr/local:/install/lib/python3.11/site-packages"
 
 COPY app ./app
 COPY scripts ./scripts
@@ -33,7 +34,7 @@ RUN cp cron/2fa-cron /etc/cron.d/2fa-cron && \
     chmod 0644 /etc/cron.d/2fa-cron && \
     crontab /etc/cron.d/2fa-cron
 
-RUN mkdir -p /data /cron && chmod 755 /data /cron
+RUN mkdir -p /data /cron && chmod -R 755 /data /cron
 
 VOLUME ["/data", "/cron"]
 

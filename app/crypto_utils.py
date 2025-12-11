@@ -16,23 +16,35 @@ def load_public_key(path: str):
 
 
 def decrypt_seed(encrypted_seed_b64: str, private_key) -> str:
-    ciphertext = base64.b64decode(encrypted_seed_b64)
+    """
+    Decrypt base64-encoded encrypted seed using RSA/OAEP-SHA256.
+    Must return a 64-character lowercase hex string.
+    """
+    try:
+        ciphertext = base64.b64decode(encrypted_seed_b64)
+    except Exception:
+        raise ValueError("Invalid base64 encrypted seed")
 
-    plaintext = private_key.decrypt(
-        ciphertext,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None,
-        ),
-    )
+    try:
+        plaintext = private_key.decrypt(
+            ciphertext,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            ),
+        )
+    except Exception:
+        raise ValueError("RSA decryption failed")
 
-    hex_seed = plaintext.decode("utf-8").strip()
+    hex_seed = plaintext.decode("utf-8").strip().lower()  # IMPORTANT FIX
 
     if len(hex_seed) != 64:
         raise ValueError("Seed must be 64 hex chars")
-    if any(c not in "0123456789abcdef" for c in hex_seed):
-        raise ValueError("Seed must be lowercase hex")
+
+    for c in hex_seed:
+        if c not in "0123456789abcdef":
+            raise ValueError("Invalid hex character in seed")
 
     return hex_seed
 
